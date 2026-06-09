@@ -1,6 +1,23 @@
 # ReVibe Market — Production Ready Marketplace
 
+<p align="center">
+  <img src="assets/readme/preview-home.jpeg" alt="Preview Halaman Utama ReVibe Market" width="900">
+</p>
+
+<p align="center">
+  <img src="assets/readme/preview-product.jpeg" alt="Preview Produk ReVibe Market" width="900">
+</p>
+
+<p align="center">
+  <a href="https://drive.google.com/drive/folders/1QyJD_6Dj758AAoSPisxKvw3fXc3pL2Z2?usp=sharing">
+    <strong>▶ Lihat Demo Video ReVibe Market</strong>
+  </a>
+</p>
+
+---
+
 ReVibe Market adalah marketplace produk preloved dan upcycle yang dibuat untuk mendukung jual beli barang bekas layak pakai dengan sistem yang lebih terarah, aman, dan siap dikembangkan.
+
 
 Proyek ini mencakup alur buyer, seller, admin, escrow/manual payment, cashback coin seller, chat, review, komplain, withdrawal, audit log, healthcheck, readiness check, worker, cron, serta dokumentasi deployment untuk kebutuhan hosting production.
 
