@@ -1,62 +1,192 @@
-# ReVibe Market — Hosting 100% Multi-Server Ready
+# ReVibe Market — Production Ready Marketplace
 
-ReVibe Market adalah marketplace untuk produk preloved/upcycle dengan alur buyer, seller, admin, escrow/manual payment, cashback coin seller, chat, review, komplain, withdrawal, audit log, healthcheck, readiness check, worker, cron, dan dokumentasi deployment production.
+ReVibe Market adalah marketplace produk preloved dan upcycle yang dibuat untuk mendukung jual beli barang bekas layak pakai dengan sistem yang lebih terarah, aman, dan siap dikembangkan.
 
-Patch ini **tidak redesign tampilan** dan **tidak mengubah konsep utama**. Fokusnya hanya membuat proyek lebih siap hosting production, VPS, Docker, cloud, dan multi-server.
+Proyek ini mencakup alur buyer, seller, admin, escrow/manual payment, cashback coin seller, chat, review, komplain, withdrawal, audit log, healthcheck, readiness check, worker, cron, serta dokumentasi deployment untuk kebutuhan hosting production.
 
-## Struktur penting
+Repository ini tidak berfokus pada redesign tampilan. Fokus utama project ini adalah memperkuat struktur sistem agar lebih siap dijalankan di local server, shared hosting, VPS, Docker, cloud, hingga skenario multi-server.
 
-- `index.php`, `pages/`, `assets/` — frontend dan halaman marketplace.
-- `api/` — endpoint API/payment/webhook.
-- `app/Services/` — service layer storage, Redis, cache, queue, payment, escrow, ledger, alerting.
-- `config/` — konfigurasi env, database, session, security, error handler.
-- `database/migrations/` — migration berurutan dan aman dijalankan ulang lewat `scripts/run_migrations.php`.
-- `scripts/` — migration, deploy check, permission check, backup/restore, cron, worker.
-- `deploy/` — contoh konfigurasi Nginx, Apache, Supervisor, dan multi-server.
-- `docs/` — panduan hosting production yang terarah.
+---
 
-## Cara jalan Local/XAMPP
+## Tujuan Project
 
-1. Copy `.env.example` menjadi `.env`.
-2. Pakai mode local: `APP_ENV=local`, `APP_DEBUG=true`, `APP_URL=http://localhost/revibe`.
-3. Buat database `revibe_market` di phpMyAdmin.
-4. Jalankan migration: `php scripts/run_migrations.php`.
-5. Buka `http://localhost/revibe`.
+ReVibe Market dibuat sebagai marketplace berbasis web yang tidak hanya menampilkan produk, tetapi juga memiliki alur transaksi yang lebih lengkap.
 
-## Shared hosting PHP/MySQL
+Beberapa fokus utama project ini:
 
-1. Upload isi folder ke `public_html` atau subfolder hosting.
-2. Buat database MySQL dari panel hosting.
-3. Isi `.env` production sederhana: `APP_ENV=production`, `APP_DEBUG=false`, `FORCE_HTTPS=true`, `MULTI_SERVER=false`.
-4. Import/migration database sesuai `docs/DATABASE_HOSTING.md`.
-5. Pastikan folder `logs`, `storage`, `uploads`, dan `backups` writable.
-6. Buka `health.php`, lalu `readiness.php`.
+* Buyer dapat mencari, melihat, dan membeli produk preloved/upcycle.
+* Seller dapat mengunggah, mengelola, dan menghapus produk jika terjadi kesalahan upload.
+* Admin memiliki kontrol terhadap transaksi, validasi, komplain, withdrawal, dan aktivitas sistem.
+* Sistem mendukung pembayaran manual/demo dengan konsep escrow.
+* Seller mendapatkan cashback coin sesuai aturan platform.
+* Project disiapkan agar lebih mudah diuji, dihosting, dan dikembangkan kembali.
 
-## VPS single server
+---
 
-1. Install PHP 8.1+, MySQL/MariaDB, Nginx/Apache, Redis opsional, Supervisor, Cron.
-2. Pakai contoh `deploy/nginx-site.conf` atau `deploy/apache-vhost.conf`.
-3. Jalankan `php scripts/run_migrations.php`.
-4. Jalankan worker dengan Supervisor dari `deploy/supervisor-worker.conf`.
-5. Tambahkan cron: `* * * * * php /var/www/revibe/scripts/cron.php`.
+## Struktur Project
 
-## Docker production
+* `index.php`, `pages/`, `assets/`
+  Bagian frontend dan halaman utama marketplace.
+
+* `api/`
+  Endpoint API, payment, webhook, dan proses data.
+
+* `app/Services/`
+  Service layer untuk storage, Redis, cache, queue, payment, escrow, ledger, dan alerting.
+
+* `config/`
+  Konfigurasi environment, database, session, security, dan error handler.
+
+* `database/migrations/`
+  Migration database yang dibuat berurutan dan aman dijalankan ulang melalui `scripts/run_migrations.php`.
+
+* `scripts/`
+  Script untuk migration, deploy check, permission check, backup/restore, cron, dan worker.
+
+* `deploy/`
+  Contoh konfigurasi Nginx, Apache, Supervisor, dan multi-server.
+
+* `docs/`
+  Dokumentasi hosting, checklist deployment, database, dan panduan production.
+
+---
+
+## Cara Menjalankan di Local/XAMPP
+
+1. Copy file `.env.example` menjadi `.env`.
+2. Atur konfigurasi local:
+
+```env
+APP_ENV=local
+APP_DEBUG=true
+APP_URL=http://localhost/revibe
+```
+
+3. Buat database baru di phpMyAdmin, contoh:
+
+```text
+revibe_market
+```
+
+4. Jalankan migration:
+
+```bash
+php scripts/run_migrations.php
+```
+
+5. Buka project melalui browser:
+
+```text
+http://localhost/revibe
+```
+
+---
+
+## Shared Hosting PHP/MySQL
+
+1. Upload isi folder project ke `public_html` atau subfolder hosting.
+2. Buat database MySQL melalui panel hosting.
+3. Atur `.env` untuk production sederhana:
+
+```env
+APP_ENV=production
+APP_DEBUG=false
+FORCE_HTTPS=true
+MULTI_SERVER=false
+```
+
+4. Import database atau jalankan migration sesuai panduan di `docs/DATABASE_HOSTING.md`.
+5. Pastikan folder berikut memiliki permission writable:
+
+```text
+logs
+storage
+uploads
+backups
+```
+
+6. Cek status aplikasi melalui:
+
+```text
+health.php
+readiness.php
+```
+
+---
+
+## VPS Single Server
+
+Untuk VPS, project ini dapat dijalankan dengan stack PHP, MySQL/MariaDB, Nginx/Apache, Redis opsional, Supervisor, dan Cron.
+
+Langkah utama:
+
+1. Install PHP 8.1+, MySQL/MariaDB, Nginx/Apache, Redis opsional, Supervisor, dan Cron.
+2. Gunakan contoh konfigurasi dari:
+
+```text
+deploy/nginx-site.conf
+deploy/apache-vhost.conf
+```
+
+3. Jalankan migration:
+
+```bash
+php scripts/run_migrations.php
+```
+
+4. Jalankan worker menggunakan Supervisor dari:
+
+```text
+deploy/supervisor-worker.conf
+```
+
+5. Tambahkan cron:
+
+```bash
+* * * * * php /var/www/revibe/scripts/cron.php
+```
+
+---
+
+## Docker Production
+
+Project ini juga disiapkan untuk kebutuhan Docker production.
 
 ```bash
 cp .env.example .env
-# edit .env production
 COMPOSE_FILE=docker-compose.production.yml docker compose up -d --build
 ```
 
-`docker-compose.production.yml` berisi `app`, `worker`, `scheduler`, `redis`, dan `db-demo` opsional. Production serius disarankan memakai managed database eksternal.
+File `docker-compose.production.yml` berisi service untuk:
 
-## Multi-server production
+* app
+* worker
+* scheduler
+* redis
+* db-demo opsional
 
-Gunakan arsitektur:
+Untuk production serius, sangat disarankan memakai managed database eksternal, bukan database demo bawaan container.
 
-Cloudflare DNS/CDN/WAF → Load Balancer → App Server 1/2 → Managed MySQL → Managed Redis → S3/R2/Spaces → Worker → Scheduler → Backup Offsite → Monitoring.
+---
 
-Wajib di `.env`:
+## Multi-Server Production
+
+Untuk skala production, arsitektur yang disarankan:
+
+```text
+Cloudflare DNS/CDN/WAF
+→ Load Balancer
+→ App Server 1/2
+→ Managed MySQL
+→ Managed Redis
+→ S3/R2/Spaces
+→ Worker
+→ Scheduler
+→ Backup Offsite
+→ Monitoring
+```
+
+Konfigurasi `.env` minimum untuk multi-server:
 
 ```env
 APP_ENV=production
@@ -73,30 +203,104 @@ ADMIN_2FA_REQUIRED=true
 PAYMENT_SANDBOX=false
 ```
 
-Baca `docs/MULTI_SERVER_GUIDE.md` dan `deploy/multiserver/deploy-checklist.md`.
+Panduan lengkap dapat dibaca di:
 
-## Health dan readiness
+```text
+docs/MULTI_SERVER_GUIDE.md
+deploy/multiserver/deploy-checklist.md
+```
 
-- `health.php` ringan untuk load balancer. Return 200 jika app hidup.
-- `readiness.php` mengecek database, migration, Redis, storage, env production, backup, monitoring, 2FA admin, payment sandbox, cron, dan worker.
-- Untuk multi-server production, readiness akan gagal 503 jika Redis/storage remote belum benar.
+---
 
-## Checklist sebelum live
+## Healthcheck dan Readiness
 
-Baca `docs/HOSTING_100_CHECKLIST.md` dan `docs/RELEASE_CHECKLIST_100.md`.
+Project ini memiliki dua pengecekan utama:
 
-## Catatan keamanan GitHub
+* `health.php`
+  Digunakan untuk pengecekan ringan. Cocok untuk load balancer karena hanya memastikan aplikasi hidup.
 
-Jangan commit `.env`, dump database, file backup, log, file private user, bukti pembayaran, dokumen komplain, ZIP lama, atau secret asli. `.gitignore`, `.dockerignore`, dan CI sudah dibuat untuk membantu mencegah ini.
+* `readiness.php`
+  Digunakan untuk mengecek kesiapan sistem, seperti database, migration, Redis, storage, environment production, backup, monitoring, 2FA admin, payment sandbox, cron, dan worker.
 
-## Cloudflare Demo 100
+Pada mode multi-server production, readiness akan mengembalikan status gagal jika Redis atau remote storage belum dikonfigurasi dengan benar.
 
-Untuk demo public lewat Cloudflare Tunnel, gunakan README_CLOUDFLARE_DEMO.md dan import database/revibemarket_cloudflare_demo.sql ke database revibemarket.
+---
 
-Payment pada paket ini manual demo. Demo saja, jangan transfer uang asli. Biaya Layanan ReVibe adalah 12%, cashback seller 6%, dan margin platform demo 6%.
+## Fitur Seller Delete Upload
 
-## Patch seller delete upload
-- Seller dapat menghapus produk dari Seller Center jika salah upload.
-- Jika produk belum memiliki transaksi, produk dan foto produk dihapus permanen.
-- Jika produk sudah memiliki transaksi, produk disembunyikan dan stok dibuat 0 agar riwayat order tetap aman.
-- Form Jual Barang sekarang memiliki preview foto dengan tombol Hapus sebelum produk diposting.
+Patch ini menambahkan fitur penghapusan produk dari sisi seller.
+
+Aturannya:
+
+* Seller dapat menghapus produk dari Seller Center jika terjadi kesalahan upload.
+* Jika produk belum memiliki transaksi, produk dan foto produk dihapus permanen.
+* Jika produk sudah memiliki transaksi, produk tidak dihapus permanen, tetapi disembunyikan dan stok dibuat 0 agar riwayat order tetap aman.
+* Form Jual Barang memiliki preview foto dengan tombol hapus sebelum produk diposting.
+
+Fitur ini dibuat agar seller tidak terkunci ketika salah upload foto atau salah memasukkan produk.
+
+---
+
+## Cloudflare Demo
+
+Untuk demo public menggunakan Cloudflare Tunnel, gunakan panduan:
+
+```text
+README_CLOUDFLARE_DEMO.md
+```
+
+Database demo tersedia di:
+
+```text
+database/revibemarket_cloudflare_demo.sql
+```
+
+Payment pada paket ini masih manual/demo. Jangan gunakan untuk transaksi uang asli tanpa audit production lebih lanjut.
+
+Skema demo:
+
+* Biaya layanan ReVibe: 12%
+* Cashback seller: 6%
+* Margin platform demo: 6%
+
+---
+
+## Catatan Keamanan
+
+Jangan commit file berikut ke GitHub:
+
+* `.env`
+* dump database private
+* file backup
+* log server
+* file user private
+* bukti pembayaran
+* dokumen komplain
+* ZIP project lama
+* API key
+* token
+* secret production
+
+Project ini sudah dilengkapi `.gitignore`, `.dockerignore`, dan CI untuk membantu mencegah file sensitif ikut terunggah.
+
+---
+
+## Status Project
+
+Project ini dibuat sebagai bagian dari pengembangan sistem marketplace berbasis PHP/MySQL dengan fokus pada alur transaksi, kesiapan hosting, dan struktur production.
+
+Repository ini dapat digunakan untuk kebutuhan demo, portofolio, pengujian local, dan pengembangan lanjutan.
+
+---
+
+## Kontak
+
+Jika tertarik dengan project ini, ingin melihat demo, membutuhkan penjelasan teknis, atau ingin berdiskusi lebih lanjut, silakan hubungi:
+
+```text
+Aidil Farhan Rares
+Email: aidilfarhanr@gmail.com
+GitHub: aidilfarhanr-sketch
+```
+
+Project ini dibuat dan dikembangkan oleh Aidil Farhan Rares.
