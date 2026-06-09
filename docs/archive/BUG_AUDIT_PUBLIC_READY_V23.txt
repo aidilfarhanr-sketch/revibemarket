@@ -1,0 +1,13 @@
+REVIBE PUBLIC V23 BUGFIX PACK
+
+Bug yang diperbaiki dari screenshot:
+1. Profile popup tertutup navbar karena z-index navbar terlalu tinggi.
+2. Floating Home/Rank/Chat muncul di atas modal profile/login.
+3. Login popup terlalu tinggi di layar pendek sehingga bagian bawah terpotong.
+4. Profile popup sekarang scroll internal dan tidak memotong avatar/header.
+5. Dropdown kategori tetap berada di atas hero/video.
+6. Overlay modal bisa ditutup dengan klik area gelap dan tombol ESC.
+
+Catatan public-ready:
+- Tetap gunakan database V20/V22 sebelumnya. Tidak ada perubahan database di V23.
+- Untuk production real, aktifkan HTTPS, SMTP, payment gateway, dan API ongkir resmi.

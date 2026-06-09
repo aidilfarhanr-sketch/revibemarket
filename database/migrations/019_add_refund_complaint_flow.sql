@@ -1,0 +1,18 @@
+
+CREATE TABLE IF NOT EXISTS refund_requests (
+  id BIGINT NOT NULL AUTO_INCREMENT,
+  order_id INT NOT NULL,
+  user_id INT NOT NULL,
+  seller_id INT NOT NULL,
+  reason TEXT DEFAULT NULL,
+  status VARCHAR(60) DEFAULT 'pending',
+  requested_amount BIGINT NOT NULL DEFAULT 0,
+  approved_amount BIGINT NOT NULL DEFAULT 0,
+  admin_note TEXT DEFAULT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id), KEY idx_refund_order (order_id), KEY idx_refund_status (status)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+ALTER TABLE complaints ADD COLUMN IF NOT EXISTS requested_amount BIGINT NOT NULL DEFAULT 0;
+ALTER TABLE complaints ADD COLUMN IF NOT EXISTS approved_amount BIGINT NOT NULL DEFAULT 0;
+ALTER TABLE complaints ADD COLUMN IF NOT EXISTS admin_note TEXT DEFAULT NULL;

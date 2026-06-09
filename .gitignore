@@ -1,0 +1,90 @@
+# Environment / secrets
+.env
+*.env
+!.env.example
+!.env.*.example
+.env.*
+!.env.example
+!.env.*.example
+
+# Dependencies
+/vendor/
+/node_modules/
+
+# Logs and runtime files
+/logs/*
+!/logs/.gitkeep
+*.log
+*.json.log
+
+# Storage runtime data
+/storage/private/*
+!/storage/private/.htaccess
+!/storage/private/.gitkeep
+!/storage/private/payment_proofs/
+!/storage/private/payment_proofs/.gitkeep
+!/storage/private/complaints/
+!/storage/private/complaints/.gitkeep
+!/storage/private/rate_limits/
+!/storage/private/rate_limits/.gitkeep
+/storage/private/payment_proofs/*
+!/storage/private/payment_proofs/.gitkeep
+/storage/private/complaints/*
+!/storage/private/complaints/.gitkeep
+/storage/private/rate_limits/*
+!/storage/private/rate_limits/.gitkeep
+/storage/cache/*
+!/storage/cache/.htaccess
+!/storage/cache/.gitkeep
+/storage/public/*
+!/storage/public/.gitkeep
+
+# User uploads: keep folders, don't commit uploaded user/test files
+/uploads/**/*
+!/uploads/.gitkeep
+!/uploads/.htaccess
+!/uploads/products/
+!/uploads/products/.gitkeep
+!/uploads/products/.htaccess
+!/uploads/profile/
+!/uploads/profile/.gitkeep
+!/uploads/profile/.htaccess
+!/uploads/payment_proofs/
+!/uploads/payment_proofs/.gitkeep
+!/uploads/payment_proofs/.htaccess
+!/uploads/complaints/
+!/uploads/complaints/.gitkeep
+!/uploads/complaints/.htaccess
+!/uploads/proofs/
+!/uploads/proofs/.gitkeep
+!/uploads/proofs/.htaccess
+
+# Database dumps: keep migrations, seeds, and demo SQL only
+*.sql
+!database/migrations/*.sql
+!database/seeds/*.sql
+!database/revibemarket_cloudflare_demo.sql
+!database/clear_products_only.sql
+*.sql.gz
+*.dump
+*.bak
+*.backup
+
+# Archives / backups
+*.zip
+*.tar
+*.tar.gz
+/backups/*
+!/backups/.gitkeep
+/backup/*
+
+# Editor / OS
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Temp / cache
+*.tmp
+*.temp
+.cache/

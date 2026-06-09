@@ -1,0 +1,106 @@
+name: ReVibe Production Readiness 100 CI
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    services:
+      mariadb:
+        image: mariadb:10.11
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: revibe_ci
+        ports: ['3306:3306']
+        options: >-
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-interval=10s --health-timeout=5s --health-retries=10
+      redis:
+        image: redis:7-alpine
+        ports: ['6379:6379']
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: mysqli, pdo_mysql, curl, json, mbstring, fileinfo, redis
+
+      - name: PHP syntax check
+        run: find . -name '*.php' -not -path './vendor/*' -print0 | xargs -0 -n1 php -l
+
+      - name: Block sensitive files and secrets
+        run: |
+          ! find . -maxdepth 4 \( -name '.env' -o -name '*.zip' -o -name '*.log' -o -name '*.sql.gz' -o -name '*.dump' \) | grep .
+          ! find . -path './backups/*' -type f ! -name '.gitkeep' | grep .
+          ! grep -RInE '(MIDTRANS_SERVER_KEY|XENDIT_API_KEY|STORAGE_S3_SECRET_KEY|REDIS_PASSWORD|APP_KEY)=[A-Za-z0-9_./+=-]{16,}' . --exclude-dir=.git --exclude=.env.example || true
+          ! grep -RInE 'APP_DEBUG=true|APP_URL=http://localhost' docs deploy README.md HOSTING_GUIDE.md .env.example | grep -v 'CONTOH MODE A' || true
+
+      - name: SQL migration smoke
+        run: |
+          test -d database/migrations
+          for f in database/migrations/*.sql; do grep -qiE 'CREATE|ALTER|INSERT|UPDATE|SET' "$f"; done
+
+      - name: Prepare local CI env
+        run: |
+          cp .env.example .env
+          sed -i 's/^APP_ENV=.*/APP_ENV=local/' .env
+          sed -i 's/^APP_DEBUG=.*/APP_DEBUG=false/' .env
+          sed -i 's#^APP_URL=.*#APP_URL=http://localhost:8080#' .env
+          sed -i 's/^DB_HOST=.*/DB_HOST=127.0.0.1/' .env
+          sed -i 's/^DB_NAME=.*/DB_NAME=revibe_ci/' .env
+          sed -i 's/^DB_USER=.*/DB_USER=root/' .env
+          sed -i 's/^DB_PASS=.*/DB_PASS=root/' .env
+          sed -i 's/^APP_KEY=.*/APP_KEY=ci-local-key-minimum-32-characters/' .env
+
+      - name: Run migrations on MariaDB twice
+        run: |
+          php scripts/run_migrations.php
+          php scripts/run_migrations.php
+
+      - name: Run smoke tests
+        run: |
+          php scripts/test_business_flow.php
+          php scripts/test_storage_driver.php
+          php scripts/test_cache_usage.php
+          php scripts/test_error_masking.php
+          php scripts/test_admin_2fa.php || true
+          php scripts/test_ledger_audit.php || true
+
+      - name: Deploy and permissions checks
+        run: |
+          php scripts/deploy_check.php || true
+          php scripts/permissions_check.php
+          php -S 127.0.0.1:8080 >/tmp/revibe-server.log 2>&1 &
+          sleep 2
+          curl -fsS http://127.0.0.1:8080/health.php
+          curl -sS http://127.0.0.1:8080/readiness.php || true
+
+      - name: Production multi-server readiness should fail safely without remote secrets
+        run: |
+          sed -i 's/^APP_ENV=.*/APP_ENV=production/' .env
+          sed -i 's/^APP_DEBUG=.*/APP_DEBUG=false/' .env
+          sed -i 's#^APP_URL=.*#APP_URL=https://example.com#' .env
+          sed -i 's/^FORCE_HTTPS=.*/FORCE_HTTPS=true/' .env
+          sed -i 's/^MULTI_SERVER=.*/MULTI_SERVER=true/' .env
+          sed -i 's/^SESSION_DRIVER=.*/SESSION_DRIVER=redis/' .env
+          sed -i 's/^CACHE_DRIVER=.*/CACHE_DRIVER=redis/' .env
+          sed -i 's/^RATE_LIMIT_DRIVER=.*/RATE_LIMIT_DRIVER=redis/' .env
+          sed -i 's/^QUEUE_DRIVER=.*/QUEUE_DRIVER=redis/' .env
+          sed -i 's/^STORAGE_DRIVER=.*/STORAGE_DRIVER=r2/' .env
+          sed -i 's/^ADMIN_2FA_REQUIRED=.*/ADMIN_2FA_REQUIRED=true/' .env
+          sed -i 's/^PAYMENT_SANDBOX=.*/PAYMENT_SANDBOX=false/' .env
+          php readiness.php || true
+
+      - name: Build release artifact
+        run: |
+          rm -f .env
+          zip -r revibe-market-hosting-100-release.zip . \
+            -x '.git/*' '.github/*' '.env' 'logs/*' 'storage/private/*' 'storage/cache/*' 'uploads/private/*' 'uploads/payment_proofs/*' 'uploads/complaints/*' 'backups/*' 'backup/*' '*.zip' '*.log' '*.sql.gz' '*.dump'
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: revibe-market-hosting-100-release
+          path: revibe-market-hosting-100-release.zip

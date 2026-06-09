@@ -1,0 +1,28 @@
+REVIBE MARKET V22 - PUBLIC READY BUG AUDIT
+
+FIXED IN V22
+1. Category dropdown tertutup/terpotong hero video.
+   Root cause: .main-navbar memakai CSS contain: layout paint sehingga panel dropdown ter-clip area navbar.
+   Fix: navbar overflow visible, contain none, z-index dropdown lebih tinggi dari hero, mobile dropdown fixed.
+
+2. Private upload .htaccess diperkuat.
+   Root cause: hanya memakai "Deny from all" yang lebih cocok Apache lama.
+   Fix: ditambah Require all denied + fallback Apache lama + Options -Indexes.
+
+3. Security headers ditambah.
+   Fix: Permissions-Policy dan always nosniff.
+
+CHECKED
+- Semua file PHP lolos php -l, tidak ada syntax error.
+- Search input di index.php sudah memakai e().
+- Checkout sudah pakai transaksi dan SELECT FOR UPDATE.
+- Produk sendiri tidak bisa dibeli.
+- Coin balance sudah ledger-only dari coin_transactions.
+- Withdrawal admin/action sudah dicegah double-process berdasarkan status pending.
+
+CATATAN PRODUCTION YANG MASIH PERLU SERVER/PIHAK KETIGA
+1. Ongkir resmi real-time tetap butuh API RajaOngkir/Biteship/ekspedisi resmi.
+2. Pembayaran publik lebih aman memakai payment gateway seperti Midtrans/Xendit, bukan verifikasi manual.
+3. Reset password memakai mail() perlu SMTP aktif di hosting.
+4. Untuk traffic besar, chat perlu WebSocket/SSE atau polling terjadwal.
+5. Jalankan HTTPS dan set cookie secure/httponly/samesite di konfigurasi server.

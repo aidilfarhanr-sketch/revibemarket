@@ -1,0 +1,25 @@
+name: revibe-market
+services:
+  - name: web
+    source_dir: /
+    dockerfile_path: Dockerfile
+    instance_count: 2
+    http_port: 80
+    health_check:
+      http_path: /health.php
+    envs:
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: "false"
+      - key: MULTI_SERVER
+        value: "true"
+workers:
+  - name: worker
+    source_dir: /
+    dockerfile_path: Dockerfile
+    run_command: php scripts/queue_worker.php --daemon --limit=50
+  - name: scheduler
+    source_dir: /
+    dockerfile_path: Dockerfile
+    run_command: sh -c 'while true; do php scripts/cron.php; sleep 60; done'

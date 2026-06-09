@@ -1,0 +1,20 @@
+FIX PILIH TITIK ALAMAT - ReVibe V26
+
+Masalah:
+Modal Pilih Titik Alamat stuck di tulisan "Memuat peta interaktif..." karena Content-Security-Policy di .htaccess hanya mengizinkan resource dari self. Akibatnya Leaflet dari unpkg.com, tile OpenStreetMap, dan reverse geocode Nominatim diblokir browser.
+
+Perbaikan:
+- .htaccess diperbarui agar mengizinkan:
+  - script/style Leaflet dari https://unpkg.com
+  - tile peta dari https://*.tile.openstreetmap.org
+  - reverse geocoding dari https://nominatim.openstreetmap.org
+
+Cara pakai:
+1. Replace folder revibe lama di htdocs dengan folder revibe dari ZIP ini.
+2. Restart Apache XAMPP.
+3. Buka http://localhost/revibe/pages/edit_profile.php#alamat
+4. Hard refresh browser: Ctrl + F5.
+5. Klik Pilih Titik di Peta.
+
+Catatan:
+Fitur peta tetap membutuhkan koneksi internet karena memakai OpenStreetMap/Leaflet CDN.

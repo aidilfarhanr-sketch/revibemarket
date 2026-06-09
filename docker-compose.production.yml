@@ -1,0 +1,82 @@
+services:
+  app:
+    build:
+      context: .
+      target: production
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      APP_ENV: production
+      APP_DEBUG: "false"
+      MULTI_SERVER: "true"
+      SESSION_DRIVER: redis
+      CACHE_DRIVER: redis
+      RATE_LIMIT_DRIVER: redis
+      QUEUE_DRIVER: redis
+      REDIS_HOST: redis
+    ports:
+      - "8080:80"
+    healthcheck:
+      test: ["CMD", "php", "-r", "$s=@json_decode(@file_get_contents('http://127.0.0.1/health.php'),true); exit(empty($s['ok']) ? 1 : 0);"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    depends_on:
+      - redis
+    volumes:
+      - revibe_logs:/var/www/html/logs
+  worker:
+    build:
+      context: .
+      target: production
+    restart: unless-stopped
+    env_file: .env
+    command: php scripts/queue_worker.php --daemon --limit=50
+    environment:
+      APP_ENV: production
+      APP_DEBUG: "false"
+      MULTI_SERVER: "true"
+      QUEUE_DRIVER: redis
+      REDIS_HOST: redis
+    depends_on:
+      - redis
+    volumes:
+      - revibe_logs:/var/www/html/logs
+  scheduler:
+    build:
+      context: .
+      target: production
+    restart: unless-stopped
+    env_file: .env
+    command: sh -c 'while true; do php scripts/cron.php; sleep 60; done'
+    environment:
+      APP_ENV: production
+      APP_DEBUG: "false"
+      MULTI_SERVER: "true"
+      REDIS_HOST: redis
+    depends_on:
+      - redis
+    volumes:
+      - revibe_logs:/var/www/html/logs
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - revibe_redis:/data
+
+  db-demo:
+    image: mariadb:10.11
+    profiles: ["demo-db"]
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: revibe_market
+      MYSQL_ROOT_PASSWORD: change-in-real-env
+      MYSQL_USER: revibe
+      MYSQL_PASSWORD: change-in-real-env
+    volumes:
+      - revibe_db_demo:/var/lib/mysql
+volumes:
+  revibe_logs:
+  revibe_redis:
+  revibe_db_demo:

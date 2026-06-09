@@ -1,0 +1,77 @@
+services:
+  app:
+    build: .
+    ports:
+      - "8080:80"
+    env_file:
+      - .env
+    environment:
+      APP_ENV: local
+      APP_DEBUG: "true"
+      APP_URL: http://localhost:8080
+      DB_HOST: db
+      DB_NAME: revibe_market
+      DB_USER: revibe
+      DB_PASS: revibe
+      REDIS_HOST: redis
+    volumes:
+      - .:/var/www/html
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+  worker:
+    build: .
+    command: php scripts/queue_worker.php --daemon --limit=50
+    env_file:
+      - .env
+    environment:
+      DB_HOST: db
+      DB_NAME: revibe_market
+      DB_USER: revibe
+      DB_PASS: revibe
+      REDIS_HOST: redis
+    volumes:
+      - .:/var/www/html
+    depends_on:
+      - app
+      - redis
+  scheduler:
+    build: .
+    command: sh -c 'while true; do php scripts/cron.php; sleep 60; done'
+    env_file:
+      - .env
+    environment:
+      DB_HOST: db
+      DB_NAME: revibe_market
+      DB_USER: revibe
+      DB_PASS: revibe
+      REDIS_HOST: redis
+    volumes:
+      - .:/var/www/html
+    depends_on:
+      - app
+      - redis
+  db:
+    image: mariadb:10.11
+    environment:
+      MYSQL_DATABASE: revibe_market
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_USER: revibe
+      MYSQL_PASSWORD: revibe
+    ports:
+      - "3307:3306"
+    volumes:
+      - revibe_db:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+volumes:
+  revibe_db:
